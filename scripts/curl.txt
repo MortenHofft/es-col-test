@@ -1,0 +1,33 @@
+curl -XDELETE 'localhost:9200/collections?pretty&pretty'
+curl -XPUT 'localhost:9200/collections?pretty&pretty'
+
+
+curl -XPUT 'localhost:9200/collections/_mapping/collections?pretty&include_type_name=true' -H 'Content-Type: application/json' -d'
+{
+  "properties": {
+    "dateRange": {
+      "type": "date_range", 
+      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+    },
+    "higherLocations" : {
+      "type" : "keyword"
+    },
+    "higherTaxa": {
+      "type": "keyword"
+    },
+    "location": {
+      "type": "keyword"
+    },
+    "preservation": {
+      "type": "keyword"
+    },
+    "collectionKey": {
+      "type": "keyword"
+    },
+    "institution": {
+      "type": "keyword"
+    }
+  }
+}
+'
+
