@@ -4,28 +4,15 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 
 // APIs
 import {
-  getCollectionOverview,
-  addContact,
-  deleteContact,
-  createIdentifier,
-  deleteIdentifier,
-  createTag,
-  deleteTag
+  getCollection
 } from '../../api/collection';
-// Configuration
-import MenuConfig from './menu.config';
+
 // Wrappers
 import PageWrapper from '../hoc/PageWrapper';
 import withContext from '../hoc/withContext';
 // Components
-import { ItemMenu, ItemHeader, CreationFeedback } from '../common';
-import CollectionDetails from './Details';
-import { PersonList, IdentifierList, TagList } from '../common/subtypes';
+import { ItemHeader, CreationFeedback } from '../common';
 import Exception404 from '../exception/404';
-import Actions from './collection.actions';
-// Helpers
-import { getSubMenu } from '../util/helpers';
-import { roles } from '../auth/enums';
 
 class Collection extends Component {
   constructor(props) {
@@ -34,14 +21,11 @@ class Collection extends Component {
     this.state = {
       loading: true,
       collection: null,
-      counts: {},
-      status: 200,
-      isNew: false
+      status: 200
     };
   }
 
   componentDidMount() {
-    this.checkRouterState();
     // A special flag to indicate if a component was mount/unmount
     this._isMount = true;
     if (this.props.match.params.key) {
@@ -62,18 +46,13 @@ class Collection extends Component {
   getData() {
     this.setState({ loading: true });
 
-    getCollectionOverview(this.props.match.params.key).then(data => {
+    getCollection(this.props.match.params.key).then(data => {
       // If user lives the page, request will return result anyway and tries to set in to a state
       // which will cause an error
       if (this._isMount) {
         this.setState({
           collection: data,
-          loading: false,
-          counts: {
-            contacts: data.contacts.length,
-            identifiers: data.identifiers.length,
-            tags: data.tags.length
-          }
+          loading: false
         });
       }
     }).catch(error => {
@@ -90,61 +69,10 @@ class Collection extends Component {
     });
   }
 
-  refresh = key => {
-    if (key) {
-      this.props.history.push(key, { isNew: true });
-    } else {
-      this.getData();
-    }
-  };
-
-  updateCounts = (key, value) => {
-    this.setState(state => {
-      return {
-        counts: {
-          ...state.counts,
-          [key]: value
-        }
-      };
-    });
-  };
-
-  update(error) {
-    // If component was unmounted interrupting changes
-    if (!this._isMount) {
-      return;
-    }
-
-    if (error) {
-      this.props.addError({ status: error.response.status, statusText: error.response.data });
-      return;
-    }
-
-    this.getData();
-  }
-
-  checkRouterState() {
-    const { history } = this.props;
-    // If we set router state previously, we'll update component's state and reset router's state
-    if (history.location && history.location.state && history.location.state.isNew) {
-      this.setState({ isNew: true });
-      const state = { ...history.location.state };
-      delete state.isNew;
-      history.replace({ ...history.location, state });
-    }
-  }
-
   getTitle = () => {
-    const { intl } = this.props;
-    const { collection, loading } = this.state;
+    const { collection } = this.state;
 
-    if (collection) {
-      return collection.name;
-    } else if (!loading) {
-      return intl.formatMessage({ id: 'newCollection', defaultMessage: 'New collection' });
-    }
-
-    return '';
+    return collection.name || '';
   };
 
   render() {
@@ -154,10 +82,7 @@ class Collection extends Component {
 
     // Parameters for ItemHeader with BreadCrumbs and page title
     const listName = intl.formatMessage({ id: 'collections', defaultMessage: 'Collections' });
-    const submenu = getSubMenu(this.props);
-    const pageTitle = collection || loading ?
-      intl.formatMessage({ id: 'title.collection', defaultMessage: 'Collection | GBIF Registry' }) :
-      intl.formatMessage({ id: 'title.newCollection', defaultMessage: 'New collection | GBIF Registry' });
+    const pageTitle = intl.formatMessage({ id: 'title.collection', defaultMessage: 'Collection | GBIF Registry' });
     const title = this.getTitle();
 
     return (
@@ -165,15 +90,11 @@ class Collection extends Component {
         <ItemHeader
           listType={[listName]}
           title={title}
-          submenu={submenu}
           pageTitle={pageTitle}
           status={status}
           loading={loading}
           usePaperWidth
         >
-          {collection && (
-            <Actions collection={collection} onChange={error => this.update(error)}/>
-          )}
         </ItemHeader>
 
         {isNew && !loading && (
@@ -187,48 +108,13 @@ class Collection extends Component {
 
         <PageWrapper status={status} loading={loading}>
           <Route path="/:type?/:key?/:section?" render={() => (
-            <ItemMenu counts={counts} config={MenuConfig} isNew={collection === null}>
-              <Switch>
-                <Route exact path={`${match.path}`} render={() =>
-                  <CollectionDetails
-                    collection={collection}
-                    refresh={key => this.refresh(key)}
-                  />
-                }/>
+            <Switch>
+              <Route exact path={`${match.path}`} render={() =>
+                <h1>collection details</h1>
+              }/>
 
-                <Route path={`${match.path}/contact`} render={() =>
-                  <PersonList
-                    persons={collection.contacts}
-                    permissions={{roles: [roles.GRSCICOLL_ADMIN]}}
-                    addPerson={data => addContact(key, data)}
-                    deletePerson={itemKey => deleteContact(key, itemKey)}
-                    updateCounts={this.updateCounts}
-                  />
-                }/>
-
-                <Route path={`${match.path}/identifier`} render={() =>
-                  <IdentifierList
-                    identifiers={collection.identifiers}
-                    permissions={{roles: [roles.GRSCICOLL_ADMIN]}}
-                    createIdentifier={data => createIdentifier(key, data)}
-                    deleteIdentifier={itemKey => deleteIdentifier(key, itemKey)}
-                    updateCounts={this.updateCounts}
-                  />
-                }/>
-
-                <Route path={`${match.path}/tag`} render={() =>
-                  <TagList
-                    tags={collection.tags}
-                    permissions={{roles: [roles.GRSCICOLL_ADMIN]}}
-                    createTag={data => createTag(key, data)}
-                    deleteTag={itemKey => deleteTag(key, itemKey)}
-                    updateCounts={this.updateCounts}
-                  />
-                }/>
-
-                <Route component={Exception404}/>
-              </Switch>
-            </ItemMenu>
+              <Route component={Exception404}/>
+            </Switch>
           )}
           />
         </PageWrapper>

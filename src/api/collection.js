@@ -1,86 +1,51 @@
 import qs from 'qs';
-import { isUUID } from 'validator';
-
-import axiosInstance from './util/axiosInstance';
+import bodybuilder from 'bodybuilder';
 import axios_cancelable from './util/axiosCancel';
-import { getInstitution } from './institution';
 
-export const collectionSearch = (query, filter) => {
-  const type = filter ? filter.type : '';
-
-  switch (type) {
-    case 'deleted':
-      return collectionDeleted(query);
-    default:
-      return axios_cancelable.get(`/grscicoll/collection?${qs.stringify(query)}`);
-  }
-};
-
-export const collectionDeleted = query => {
-  return axios_cancelable.get(`/grscicoll/collection/deleted?${qs.stringify(query)}`);
+export const collectionSearch = (query) => {
+  const postTest = {
+    "size": 0,
+    "query": {
+        "query_string": {
+            "default_field": "description",
+            "query": query.q
+        }
+    },
+    "aggs": {
+        "collections": {
+            "terms": {
+                "field": "collectionKey.keyword"
+            },
+            "aggs": {
+                "descriptors": {
+                    "top_hits": {
+                        "size": 5
+                    }
+                }
+            }
+        }
+    }
+  };
+  return axios_cancelable.post('http://localhost:9200/collections/_search', postTest);
 };
 
 export const getCollection = key => {
-  return axios_cancelable.get(`/grscicoll/collection/${key}`);
+  return axios_cancelable.get(`/dataset/${key}`);
 };
 
-export const getSuggestedCollections = async query => {
-  if (isUUID(query.q)) {
-    const collection = (await getCollection(query.q)).data;
-    return { data: [collection] };
-  }
-  return axios_cancelable.get(`/grscicoll/collection/suggest?${qs.stringify(query)}`);
+export const speciesSuggest = str => {
+  return axios_cancelable.get(`http://api.gbif.org/v1/species/suggest?q=${str}`);
 };
 
-export const createCollection = data => {
-  return axiosInstance.post(`/grscicoll/collection`, data);
-};
 
-export const updateCollection = data => {
-  return axiosInstance.put(`/grscicoll/collection/${data.key}`, data);
-};
-
-export const deleteCollection = key => {
-  return axiosInstance.delete(`/grscicoll/collection/${key}`);
-};
-
-export const getCollectionOverview = async key => {
-  const collection = (await getCollection(key)).data;
-  let institution;
-  if (collection.institutionKey) {
-    institution = (await getInstitution(collection.institutionKey)).data;
-  }
-
-  return {
-    ...collection,
-    institution
-  }
-};
-
-export const deleteContact = (key, contactKey) => {
-  return axiosInstance.delete(`/grscicoll/collection/${key}/contact/${contactKey}`);
-};
-
-export const addContact = (key, contactData) => {
-  return axiosInstance.post(`/grscicoll/collection/${key}/contact`, contactData, {
-    headers: {
-      'Content-Type': 'text/plain'
-    }
-  });
-};
-
-export const deleteIdentifier = (key, identifierKey) => {
-  return axiosInstance.delete(`/grscicoll/collection/${key}/identifier/${identifierKey}`);
-};
-
-export const createIdentifier = (key, identifierData) => {
-  return axiosInstance.post(`/grscicoll/collection/${key}/identifier`, identifierData);
-};
-
-export const deleteTag = (key, tagKey) => {
-  return axiosInstance.delete(`/grscicoll/collection/${key}/tag/${tagKey}`);
-};
-
-export const createTag = (key, tagData) => {
-  return axiosInstance.post(`/grscicoll/collection/${key}/tag`, tagData);
-};
+export const places = [
+  "WORLD",
+  "AFRICA",
+  "ANTARCTICA",
+  "ASIA",
+  "OCEANIA",
+  "EUROPE",
+  "NORTH_AMERICA",
+  "SOUTH_AMERICA",
+  "AFGHANISTAN","ALAND_ISLANDS","ALBANIA","ALGERIA","AMERICAN_SAMOA","ANDORRA","ANGOLA","ANGUILLA","ANTIGUA_BARBUDA","ARGENTINA","ARMENIA","ARUBA","AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS","BELGIUM","BELIZE","BENIN","BERMUDA","BHUTAN","BOLIVIA","BONAIRE_SINT_EUSTATIUS_SABA","BOSNIA_HERZEGOVINA","BOTSWANA","BOUVET_ISLAND","BRAZIL","BRITISH_INDIAN_OCEAN_TERRITORY","BRUNEI_DARUSSALAM","BULGARIA","BURKINA_FASO","BURUNDI","CAMBODIA","CAMEROON","CANADA","CAPE_VERDE","CAYMAN_ISLANDS","CENTRAL_AFRICAN_REPUBLIC","CHAD","CHILE","CHINA","CHRISTMAS_ISLAND","COCOS_ISLANDS","COLOMBIA","COMOROS","CONGO_DEMOCRATIC_REPUBLIC","CONGO","COOK_ISLANDS","COSTA_RICA","CÔTE_DIVOIRE","CROATIA","CUBA","CURAÇAO","CYPRUS","CZECH_REPUBLIC","DENMARK","DJIBOUTI","DOMINICA","DOMINICAN_REPUBLIC","ECUADOR","EGYPT","EL_SALVADOR","EQUATORIAL_GUINEA","ERITREA","ESTONIA","ETHIOPIA","FALKLAND_ISLANDS","FAROE_ISLANDS","FIJI","FINLAND","FRANCE","FRENCH_GUIANA","FRENCH_POLYNESIA","FRENCH_SOUTHERN_TERRITORIES","GABON","GAMBIA","GEORGIA","GERMANY","GHANA","GIBRALTAR","GREECE","GREENLAND","GRENADA","GUADELOUPE","GUAM","GUATEMALA","GUERNSEY","GUINEA","GUINEA_BISSAU","GUYANA","HAITI","HEARD_MCDONALD_ISLANDS","VATICAN","HONDURAS","HONG_KONG","HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISLE_OF_MAN","ISRAEL","ITALY","JAMAICA","JAPAN","JERSEY","JORDAN","KAZAKHSTAN","KENYA","KIRIBATI","KOREA_NORTH","KOREA_SOUTH","KUWAIT","KYRGYZSTAN","LAO","LATVIA","LEBANON","LESOTHO","LIBERIA","LIBYA","LIECHTENSTEIN","LITHUANIA","LUXEMBOURG","MACAO","MACEDONIA","MADAGASCAR","MALAWI","MALAYSIA","MALDIVES","MALI","MALTA","MARSHALL_ISLANDS","MARTINIQUE","MAURITANIA","MAURITIUS","MAYOTTE","MEXICO","MICRONESIA","MOLDOVA","MONACO","MONGOLIA","MONTENEGRO","MONTSERRAT","MOROCCO","MOZAMBIQUE","MYANMAR","NAMIBIA","NAURU","NEPAL","NETHERLANDS","NEW_CALEDONIA","NEW_ZEALAND","NICARAGUA","NIGER","NIGERIA","NIUE","NORFOLK_ISLAND","NORTHERN_MARIANA_ISLANDS","NORWAY","OMAN","PAKISTAN","PALAU","PALESTINIAN_TERRITORY","PANAMA","PAPUA_NEW_GUINEA","PARAGUAY","PERU","PHILIPPINES","PITCAIRN","POLAND","PORTUGAL","PUERTO_RICO","QATAR","RÉUNION","ROMANIA","RUSSIAN_FEDERATION","RWANDA","SAINT_BARTHÉLEMY","SAINT_HELENA_ASCENSION_TRISTAN_DA_CUNHA","SAINT_KITTS_NEVIS","SAINT_LUCIA","SAINT_MARTIN_FRENCH","SAINT_PIERRE_MIQUELON","SAINT_VINCENT_GRENADINES","SAMOA","SAN_MARINO","SAO_TOME_PRINCIPE","SAUDI_ARABIA","SENEGAL","SERBIA","SEYCHELLES","SIERRA_LEONE","SINGAPORE","SINT_MAARTEN","SLOVAKIA","SLOVENIA","SOLOMON_ISLANDS","SOMALIA","SOUTH_AFRICA","SOUTH_GEORGIA_SANDWICH_ISLANDS","SOUTH_SUDAN","SPAIN","SRI_LANKA","SUDAN","SURINAME","SVALBARD_JAN_MAYEN","SWAZILAND","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND","TIMOR_LESTE","TOGO","TOKELAU","TONGA","TRINIDAD_TOBAGO","TUNISIA","TURKEY","TURKMENISTAN","TURKS_CAICOS_ISLANDS","TUVALU","UGANDA","UKRAINE","UNITED_ARAB_EMIRATES","UNITED_KINGDOM","UNITED_STATES","UNITED_STATES_OUTLYING_ISLANDS","URUGUAY","UZBEKISTAN","VANUATU","VENEZUELA","VIETNAM","VIRGIN_ISLANDS_BRITISH","VIRGIN_ISLANDS","WALLIS_FUTUNA","WESTERN_SAHARA","YEMEN","ZAMBIA","ZIMBABWE"
+  ]

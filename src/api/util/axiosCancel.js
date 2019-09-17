@@ -14,6 +14,18 @@ function get(url, options) {
   return p;
 }
 
+function post(url, data, options) {
+  let cancel;
+  options = options || {};
+  options.cancelToken = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  let p = axiosInstance.post(url, data, options);
+  p.cancel = cancel;
+  return p;
+}
+
 export default {
-  get
+  get,
+  post
 };

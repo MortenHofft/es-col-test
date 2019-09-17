@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { collectionSearch } from '../../api/collection';
-import DataTable from '../common/DataTable';
+import CollectionList from '../Collection/Search/CollectionList';
 import DataQuery from '../DataQuery';
 import { standardColumns } from './columns';
 import { ItemHeader } from '../common';
-import { HasRole, roles } from '../auth';
 import Paper from './Paper';
 
 const columns = [
@@ -59,14 +58,9 @@ export const CollectionSearch = ({ initQuery = { q: '', limit: 25, offset: 0 } }
           pageTitle={pageTitle}
           listTitle={getTitle(props.filter.type)}
         >
-          <HasRole roles={[roles.REGISTRY_ADMIN, roles.GRSCICOLL_ADMIN]}>
-            <Link to="/collection/create" className="ant-btn ant-btn-primary">
-              <FormattedMessage id="createNew" defaultMessage="Create new"/>
-            </Link>
-          </HasRole>
         </ItemHeader>
         <Paper padded>
-          <DataTable {...props} columns={columns} searchable/>
+          <CollectionList {...props} columns={columns} searchable/>
         </Paper>
       </React.Fragment>
     }/>;
