@@ -43,7 +43,7 @@ export const collectionSearch = async (query) => {
     "aggs": {
       "collections": {
         "terms": {
-          "field": "collectionKey",
+          "field": "collectionKey.keyword",
           "size": 500,
           "order": {
             "max_score": "desc"
@@ -78,6 +78,10 @@ export const getCollection = key => {
 
 export const speciesSuggest = str => {
   return axios_cancelable.get(`http://api.gbif.org/v1/species/suggest?q=${str}`);
+};
+
+export const speciesFromKey = key => {
+  return axios_cancelable.get(`http://api.gbif.org/v1/species/${key}`);
 };
 
 
