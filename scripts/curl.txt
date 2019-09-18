@@ -6,8 +6,7 @@ curl -XPUT 'localhost:9200/collections/_mapping/collections?pretty&include_type_
 {
   "properties": {
     "dateRange": {
-      "type": "date_range", 
-      "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+      "type": "integer_range"
     },
     "higherLocations" : {
       "type" : "keyword"

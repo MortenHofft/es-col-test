@@ -1,4 +1,5 @@
 import axiosInstance from './util/axiosInstance';
+import _ from 'lodash';
 
 export const getCountries = () => {
   return axiosInstance.get('/enumeration/basic/Country').then(response => response.data);
@@ -68,3 +69,24 @@ export const getCitesAppendix = () => {
   return axiosInstance.get('/enumeration/basic/CitesAppendix').then(response => response.data);
 };
 
+export const getLocations = () => {
+  return axiosInstance.get('/enumeration/country')
+    .then(response => response.data)
+    .then(data => {
+      // get all possible options
+      let locations = new Set(data.map(x => x.enumName));
+      data.forEach(x => {
+        locations.add(x.gbifRegion);
+      });
+      locations.add('WORLD');
+
+      //create a mapping between locations and their higher parts
+      let higherLocations = {};
+      data.forEach(x => {
+        higherLocations[x.enumName] = ['WORLD', x.gbifRegion];
+        higherLocations[x.gbifRegion] = ['WORLD'];
+      });
+
+      return {locations: Array.from(locations), higherLocations};
+    });
+};
