@@ -43,7 +43,7 @@ export const collectionSearch = async (query) => {
     "aggs": {
       "collections": {
         "terms": {
-          "field": "collectionKey.keyword",
+          "field": "collectionKey",
           "size": 500,
           "order": {
             "max_score": "desc"

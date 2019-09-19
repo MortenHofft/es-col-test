@@ -16,17 +16,26 @@ import injectSheet from "react-jss";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
 import moment from "moment";
-import { locations, speciesSuggest, speciesFromKey } from "../../../api/collection";
-import fieldFormater from "./FieldFormater";
+
+import FilterGroup from './filters/FilterGroup';
+import TaxonFilter from './filters/TaxonFilter';
+import LocationFilter from './filters/LocationFilter';
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
 
 const Search = Input.Search;
 
-const styles = {};
+const styles = {
+  blockquote: {
+    margin: '1em 0',
+    paddingLeft: '.8em',
+    color: '#697b8c',
+    fontSize: '90%',
+    borderLeft: '4px solid #ebedf0'
+  }
+};
 
-const ScientificName = fieldFormater(id => speciesFromKey(id).then(x => ({title: x.data.scientificName})));
 /**
  * Generic table component
  * Used for displaying main items lists
@@ -42,97 +51,23 @@ class Filters extends React.Component {
     taxonSearchVisible: false
   };
 
-  onLocationSearch = searchText => {
-    locations.then(places => {
-      this.setState({
-        placeSuggestions: !searchText
-          ? places.locations
-          : places.locations.filter(x =>
-              x.toLowerCase().startsWith(searchText.toLowerCase())
-            )
-      });
-    });
-  };
-
-  cancelSpeciesSuggestPromise = () => {
-    if (
-      this.speciesSuggestPromise &&
-      typeof this.speciesSuggestPromise.cancel === "function"
-    ) {
-      this.speciesSuggestPromise.cancel();
-    }
-  };
-
-  onSpeciesSearch = searchText => {
-    let that = this;
-    this.cancelSpeciesSuggestPromise();
-    this.speciesSuggestPromise = speciesSuggest(searchText);
-    this.speciesSuggestPromise
-      .then(response => {
-        that.setState({
-          speciesSuggestions: !searchText
-            ? []
-            : response.data.map(x => ({ value: x.key, text: x.scientificName }))
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
-
-  taxonSearch = () => {
-    const { updateQuery, fetchData, query } = this.props;
-    const { taxonKey } = query;
-
-    return (
-      <div
-        style={{
-          background: "white",
-          borderRadius: "3px",
-          padding: "20px",
-          boxShadow: "0 0 1000px 1000px rgba(0,0,0,.2)"
-        }}
-      >
-        <AutoComplete
-          dataSource={this.state.speciesSuggestions}
-          style={{ width: 200 }}
-          autoFocus={true}
-          onSearch={this.onSpeciesSearch}
-          onSelect={value => {
-            fetchData({ ...query, taxonKey: Number(value), offset: 0 });
-            updateQuery({ ...query, taxonKey: Number(value) });
-            this.setState({ taxonSearchVisible: false });
-          }}
-          // onChange={value => updateQuery({ ...query, taxonKey: value })}
-          // value={taxonKey}
-          placeholder="search taxon"
-        />
-      </div>
-    );
-  };
-
   render = () => {
     const { updateQuery, fetchData, query, classes } = this.props;
-    const { q, location, taxonKey } = query;
+    const { q, location } = query;
 
     return (
       <React.Fragment>
         <Row type="flex">
           <Col span={24}>
-            <Dropdown
-              overlay={this.taxonSearch()}
-              trigger={["click"]}
-              onVisibleChange={flag =>
-                this.setState({ taxonSearchVisible: flag })
-              }
-              visible={this.state.taxonSearchVisible}
-            >
-              {taxonKey ? (
-                <Button type="primary"><ScientificName id={taxonKey} /></Button>
-              ) : (
-                <Button>What</Button>
-              )}
-            </Dropdown>
+            <div style={{border: '1px solid pink'}}>
+              <FilterGroup render={
+                props => {return <div>
+                  <TaxonFilter {...props}/>
+                  <LocationFilter {...props}/>
+                </div>}
+              }/>
+            </div>
+
           </Col>
         </Row>
         <Row type="flex">
@@ -148,17 +83,7 @@ class Filters extends React.Component {
               value={location}
               placeholder="search location"
             />
-            <AutoComplete
-              dataSource={this.state.speciesSuggestions}
-              style={{ width: 200 }}
-              onSearch={this.onSpeciesSearch}
-              onSelect={value =>
-                fetchData({ ...query, taxonKey: Number(value), offset: 0 })
-              }
-              onChange={value => updateQuery({ ...query, taxonKey: value })}
-              value={taxonKey}
-              placeholder="search taxon"
-            />
+
             <RangePicker
               defaultValue={[
                 moment("2015/01/01", dateFormat),
