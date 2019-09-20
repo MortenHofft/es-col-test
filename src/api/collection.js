@@ -5,9 +5,10 @@ import { getLocations } from './enumeration';
 
 export const locations = getLocations();
 
-export const collectionSearch = async (query) => {
-  console.log(query);
+export const getEsQuery = async (query) => {
   let filters = [];
+  if (typeof query !== 'object') return { "query_string": { "query": "*" } };
+  
   if (query.q) {
     filters.push({
       "query_string": {
@@ -30,11 +31,15 @@ export const collectionSearch = async (query) => {
       }
     });
   }
+  return filters.length === 0 ? { "query_string": { "query": "*" } } : { "bool": { "must": filters } };
+};
+
+export const collectionSearch = async (bodyQuery) => {
   const postTest = {
     "size": 0,
     "query": {
       "script_score": {
-        "query": filters.length === 0 ? { "query_string": { "query": "*" } } : { "bool": { "must": filters } },
+        "query": bodyQuery,
         "script": {
           "source": "_score + doc['count'].value/10000"
         }
@@ -94,12 +99,12 @@ async function getLocationQuery(location) {
   return {
     "bool": {
       "should": [
-        {
-          "terms": {
-            "location": higher,
-            "boost": 1
-          }
-        },
+        // {
+        //   "terms": {
+        //     "location": higher,
+        //     "boost": 1
+        //   }
+        // },
         {
           "term": {
             "higherLocations": {
@@ -123,12 +128,12 @@ async function getTaxonQuery(taxonKey) {
   return {
     "bool": {
       "should": [
-        {
-          "terms": {
-            "key": higher,
-            "boost": 1
-          }
-        },
+        // {
+        //   "terms": {
+        //     "key": higher,
+        //     "boost": 1
+        //   }
+        // },
         {
           "term": {
             "higherTaxa": {

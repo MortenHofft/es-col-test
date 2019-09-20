@@ -70,16 +70,17 @@ class FilterGroup extends React.Component {
   }
 
   updateFilter = filter => {
+    let updatedFilter = { ...this.props.defaultFilter, ...filter };
     this.setState({
-      filter: { ...this.props.defaultFilter, ...filter }
+      filter: updatedFilter
     });
+    this.props.updateFilter(updatedFilter)
   }
 
   render() {
     return (
       <React.Fragment>
         {this.props.render(this.state)}
-        <blockquote>{JSON.stringify(this.state.filter)}</blockquote>
       </React.Fragment>
     );
   }

@@ -12,7 +12,7 @@ import Paper from './Paper';
 
 const columns = [
   {
-    title: <FormattedMessage id="name" defaultMessage="Name"/>,
+    title: <FormattedMessage id="name" defaultMessage="Name" />,
     dataIndex: 'name',
     width: '400px',
     render: (text, record) => <Link to={`/collection/${record.key}`}>{text}</Link>
@@ -21,47 +21,34 @@ const columns = [
 ];
 // Attaching filters to the last column
 columns[columns.length - 1].filters = [
-  { text: <FormattedMessage id="listType.deleted" defaultMessage="Deleted"/>, value: 'deleted' }
+  { text: <FormattedMessage id="listType.deleted" defaultMessage="Deleted" />, value: 'deleted' }
 ];
 // Setting filter type as radio - can choose only one option
 columns[columns.length - 1].filterMultiple = false;
 
 const pageTitle = { id: 'title.collections', defaultMessage: 'Collections | GBIF Registry' };
-const listName = <FormattedMessage id="collections" defaultMessage="Collections"/>;
+const listName = <FormattedMessage id="collections" defaultMessage="Collections" />;
 
 const getType = type => {
   switch (type) {
     case 'deleted':
-      return <FormattedMessage id="listType.deleted" defaultMessage="Deleted"/>;
+      return <FormattedMessage id="listType.deleted" defaultMessage="Deleted" />;
     default:
-      return <FormattedMessage id="listType.search" defaultMessage="Search"/>;
+      return <FormattedMessage id="listType.search" defaultMessage="Search" />;
   }
 };
 
 const getTitle = type => {
   switch (type) {
     case 'deleted':
-      return <FormattedMessage id="menu.collection.deleted" defaultMessage="Deleted collections"/>;
+      return <FormattedMessage id="menu.collection.deleted" defaultMessage="Deleted collections" />;
     default:
-      return <FormattedMessage id="menu.collection.search" defaultMessage="Search collections"/>;
+      return <FormattedMessage id="menu.collection.search" defaultMessage="Search collections" />;
   }
 };
 
 export const CollectionSearch = ({ initQuery = { q: '', limit: 25, offset: 0 } }) => {
-  return <DataQuery
-    api={collectionSearch}
-    initQuery={initQuery}
-    render={props =>
-      <React.Fragment>
-        <ItemHeader
-          listType={[listName, getType(props.filter.type)]}
-          pageTitle={pageTitle}
-          listTitle={getTitle(props.filter.type)}
-        >
-        </ItemHeader>
-        <Paper padded>
-          <CollectionList {...props} columns={columns} searchable/>
-        </Paper>
-      </React.Fragment>
-    }/>;
+  return <Paper padded>
+    <CollectionList />
+  </Paper>
 };

@@ -45,22 +45,16 @@ const styles = {
  * @constructor
  */
 class Filters extends React.Component {
-  state = {
-    placeSuggestions: [],
-    speciesSuggestions: [],
-    taxonSearchVisible: false
-  };
 
   render = () => {
-    const { updateQuery, fetchData, query, classes } = this.props;
-    const { q, location } = query;
+    const { filter, esFilter, setFilter, setField, classes } = this.props;
 
     return (
       <React.Fragment>
         <Row type="flex">
           <Col span={24}>
-            <div style={{border: '1px solid pink'}}>
-              <FilterGroup render={
+            <div>
+              <FilterGroup updateFilter={setFilter} render={
                 props => {return <div>
                   <TaxonFilter {...props}/>
                   <LocationFilter {...props}/>
@@ -70,7 +64,7 @@ class Filters extends React.Component {
 
           </Col>
         </Row>
-        <Row type="flex">
+        {/* <Row type="flex">
           <Col span={24}>
             <AutoComplete
               dataSource={this.state.placeSuggestions}
@@ -110,16 +104,16 @@ class Filters extends React.Component {
               style={{ marginBottom: "16px" }}
             />
           </Col>
-        </Row>
+        </Row> */}
       </React.Fragment>
     );
   };
 }
 
-Filters.propTypes = {
-  updateQuery: PropTypes.func.isRequired, // method to update request parameters during manipulation with table (pagination, search)
-  fetchData: PropTypes.func.isRequired, // method to re-request data after parameters were updated
-  query: PropTypes.object.isRequired
-};
+// Filters.propTypes = {
+//   updateQuery: PropTypes.func.isRequired, // method to update request parameters during manipulation with table (pagination, search)
+//   fetchData: PropTypes.func.isRequired, // method to re-request data after parameters were updated
+//   query: PropTypes.object.isRequired
+// };
 
 export default injectSheet(styles)(injectIntl(Filters));

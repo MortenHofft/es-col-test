@@ -5,13 +5,13 @@ import injectSheet from "react-jss";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
 import moment from 'moment';
-import { locations, speciesSuggest } from '../../../api/collection';
+import { locations, speciesSuggest, getEsQuery, collectionSearch } from '../../../api/collection';
 import Filters from './Filters';
-
-const { RangePicker } = DatePicker;
-const dateFormat = 'YYYY/MM/DD';
-
-const Search = Input.Search;
+import CountProgress from '../charts/generic/CountProgress';
+import CountCard from '../charts/generic/CountCard';
+import SpecimenCount from '../charts/SpecimenCount';
+import FilterManager from './filters/FilterManager';
+import DataFetcher from '../charts/DataFetcher';
 
 const styles = {
   scrollContainer: {
@@ -91,68 +91,71 @@ class CollectionList extends React.Component {
 
   render = () => {
     const {
-      updateQuery,
-      fetchData,
-      data,
-      query,
-      loading,
-      filter,
-      error,
-      columns,
       classes,
     } = this.props;
-    // If filters were added to the column
-    if (columns[columns.length - 1].hasOwnProperty("filters")) {
-      // Adding active filter
-      columns[columns.length - 1].filteredValue = [filter.type];
-    }
 
     return (
       <React.Fragment>
-        {!error && (
-          <Row type="flex">
-            <Col span={24}>
-              <Filters query={query} updateQuery={updateQuery} fetchData={fetchData}/>
-              <div className={classes.scrollContainer}>
-                {!loading &&
-                  data &&
-                  this.formatCollections(data.aggregations.collections)
-                }
-              </div>
-            </Col>
-          </Row>
-        )}
-        {error && (
-          <Alert
-            message={
-              <FormattedMessage id="error.title" defaultMessage="Error" />
-            }
-            description={
-              <FormattedMessage
-                id="error.description"
-                defaultMessage="An error happened while trying to process your request. Please report the error at https://github.com/gbif/portal-feedback/issues/new"
+        <Row type="flex">
+          <Col span={24}>
+            <FilterManager render={props => {
+              return <React.Fragment>
+                <Filters {...props} />
+                <SpecimenCount query={props.esFilter} />
+                {props.esFilter && <DataFetcher api={collectionSearch} query={props.esFilter} render={
+                  ({ data, loading, error }) => {
+                    return <div>
+                      {!loading && !error &&
+                        this.formatCollections(data.data.aggregations.collections)
+                      }
+                    </div>
+                  }
+                } />}
+              </React.Fragment>
+            }} />
+
+            <React.Fragment>
+              <CountCard count={34563456} title="Collection descriptions" helpText="some explainer could go here" style={{ width: 400 }} />
+              <CountProgress
+                style={{ width: 400 }}
+                items={[
+                  { title: '13.023 digitized', percent: 30 },
+                  { title: '982 with image', percent: 20 },
+                  { title: '1.202 with location', percent: 30 }
+                ]}
+                suffix="Specimens"
+                title={Number(34563456).toLocaleString()}
               />
-            }
-            type="error"
-            showIcon
-          />
-        )}
+              <CountProgress
+                style={{ width: 400 }}
+                items={[
+                  { title: '13.023 digitized', percent: 30 },
+                  { title: '982 with image', percent: 20 },
+                  { title: '1.202 with location', percent: 1 }
+                ]}
+                title="Storage breakdown"
+                strokeColor="pink"
+              />
+            </React.Fragment>
+
+          </Col>
+        </Row>
       </React.Fragment>
     );
   };
 }
 
-CollectionList.propTypes = {
-  updateQuery: PropTypes.func.isRequired, // method to update request parameters during manipulation with table (pagination, search)
-  fetchData: PropTypes.func.isRequired, // method to re-request data after parameters were updated
-  query: PropTypes.object.isRequired,
-  data: PropTypes.object.isRequired, // object data to show in table
-  columns: PropTypes.array.isRequired, // array of column objects to display in table
-  error: PropTypes.bool.isRequired, // true if data fetching failed
-  loading: PropTypes.bool.isRequired, // data fetching in progress or not
-  searchable: PropTypes.bool, // indicates if table should show search field or not
-  width: PropTypes.number, // Optional parameter if you want to set width from outside
-  noHeader: PropTypes.bool // An option to hide table's header
-};
+// CollectionList.propTypes = {
+//   updateQuery: PropTypes.func.isRequired, // method to update request parameters during manipulation with table (pagination, search)
+//   fetchData: PropTypes.func.isRequired, // method to re-request data after parameters were updated
+//   query: PropTypes.object.isRequired,
+//   data: PropTypes.object.isRequired, // object data to show in table
+//   columns: PropTypes.array.isRequired, // array of column objects to display in table
+//   error: PropTypes.bool.isRequired, // true if data fetching failed
+//   loading: PropTypes.bool.isRequired, // data fetching in progress or not
+//   searchable: PropTypes.bool, // indicates if table should show search field or not
+//   width: PropTypes.number, // Optional parameter if you want to set width from outside
+//   noHeader: PropTypes.bool // An option to hide table's header
+// };
 
 export default injectSheet(styles)(injectIntl(CollectionList));
