@@ -59,7 +59,7 @@ export const CountCard = props => {
       <div className={classes.media}>
         <div className={classes.icon}><Icon type="tag" theme="filled" style={{ fontSize: 35, lineHeight: '80px', }} /></div>
         <div className={classes.text}>
-          <div className={classes.count}>{!loading ? count.toLocaleString() : 'Loading'}</div>
+          <div className={classes.count}>{!loading && typeof count !== 'undefined' ? count.toLocaleString() : 'Loading'}</div>
           <div className={`${classes.small} ${classes.type}`}>{title ? title : ' '}</div>
         </div>
       </div>

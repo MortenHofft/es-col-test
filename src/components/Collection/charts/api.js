@@ -11,7 +11,7 @@ export const getCollectionCount = query => {
     "aggs" : {
         "count" : {
             "cardinality" : {
-                "field" : "collectionKey"
+                "field" : "collectionKey.keyword"
             }
         }
     }
