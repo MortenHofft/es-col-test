@@ -8,13 +8,13 @@ export const getCollectionCount = query => {
   let body = {
     "size": 0,
     "query": query || undefined,
-    "aggs" : {
-        "count" : {
-            "cardinality" : {
-                "field" : "collectionKey.keyword"
-            }
+    "aggs": {
+      "count": {
+        "cardinality": {
+          "field": "collectionKey"
         }
+      }
     }
-};
+  };
   return axios_cancelable.post(`${apiUrl}_search`, body).then(response => response.data.aggregations.count.value);
 }

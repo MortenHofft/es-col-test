@@ -1,6 +1,8 @@
 const axios = require('axios');
 const _ = require('lodash');
 const countryMap = require('./countries');
+const Chance = require('chance');
+var chance = new Chance();
 
 async function getHigherTaxa(key, actualCount) {
   var response = await axios.get(`https://api.gbif.org/v1/species/${key}`);
@@ -14,15 +16,17 @@ async function getHigherTaxa(key, actualCount) {
 }
 
 function getPrettyNumber(nr) {
-  let size = Math.pow(10, Math.floor(nr).toString().length-1);
-  return Math.min(Math.max(0, Math.ceil(nr/size)*size), 1000000);
+  let size = Math.pow(10, Math.floor(nr).toString().length - 1);
+  return Math.min(Math.max(0, Math.ceil(nr / size) * size), 1000000);
 }
 function getCounts(count) {
   return {
     count: getPrettyNumber(count),
     typeCount: getPrettyNumber(count * _.random(0, 0.1)),
     digitizedCount: getPrettyNumber(count * _.random(0, 0.2)),
-    uncertainty: 5 * _.random(1, 5) / 100
+    uncertainty: 5 * _.random(1, 5) / 100,
+    numberCatalogued: getPrettyNumber(count * _.random(0, 0.25)),
+    StorageVolume: _.random(2, 100)
   }
 }
 
@@ -61,11 +65,58 @@ function getRandomLocation() {
 }
 
 function getRandomCollection() {
-  return ['COL_A', 'COL_B', 'COL_C'][_.random(0,2)];
+  return ['COL_A', 'COL_B', 'COL_C'][_.random(0, 2)];
 }
 
 function getRandomInstitution() {
-  return ['Inst_A', 'Inst_B', 'Inst_C'][_.random(0,2)];
+  return ['8dcaa17b-eaf0-4017-a064-90587700aa4e', '07558d80-dea0-41f8-a1b7-b147e9515605', '1d808a7c-1f9e-4379-9616-edb749ecf10e'][_.random(0, 2)];
+}
+
+let agents = [
+  {
+    action: 'CURATED',
+    identifier: '123',
+    name: 'Benny'
+  },
+  {
+    action: 'COLLECTED',
+    identifier: '123',
+    name: 'Benny'
+  },
+  {
+    action: 'CURATED',
+    identifier: '456',
+    name: 'Beate'
+  },
+  {
+    action: 'COLLECTED',
+    identifier: '789',
+    name: 'Carola'
+  },
+  {
+    action: 'IDENTIFIED',
+    identifier: '011',
+    name: 'Jasper'
+  }
+];
+function getRandomAgent() {
+  return agents[_.random(0, agents.length - 1)];
+}
+
+function getRandomDescription() {
+  return  chance.paragraph();
+}
+
+function getRandomCoordinates() {
+  return chance.coordinates();
+}
+
+function getRandomAgents() {
+  let a = [getRandomAgent()];
+  if (Math.random() > 0.5) {
+    a.push(getRandomAgent());
+  }
+  return a;
 }
 
 let locations = {
@@ -100,6 +151,10 @@ module.exports = {
   locations,
   preservationTypes,
   getRandomInstitution,
+  getRandomCoordinates,
+  getRandomAgent,
+  getRandomAgents,
+  getRandomDescription,
   getCounts,
   getLocationFromCountryCode
 }

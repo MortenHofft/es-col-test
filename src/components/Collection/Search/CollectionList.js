@@ -1,6 +1,6 @@
 import React from "react";
 import { FormattedMessage, FormattedNumber, injectIntl } from "react-intl";
-import { Input, AutoComplete, Table, Spin, Alert, Row, Col, DatePicker } from "antd";
+import { Input, AutoComplete, Table, Spin, Alert, Row, Col, DatePicker, Tabs } from "antd";
 import injectSheet from "react-jss";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
@@ -12,6 +12,8 @@ import CountCard from '../charts/generic/CountCard';
 import SpecimenCount from '../charts/SpecimenCount';
 import FilterManager from './filters/FilterManager';
 import DataFetcher from '../charts/DataFetcher';
+
+const { TabPane } = Tabs;
 
 const styles = {
   scrollContainer: {
@@ -101,43 +103,48 @@ class CollectionList extends React.Component {
             <FilterManager render={props => {
               return <React.Fragment>
                 <Filters {...props} />
-                <SpecimenCount query={props.esFilter} />
-                {props.esFilter && <DataFetcher api={collectionSearch} query={props.esFilter} render={
-                  ({ data, loading, error }) => {
-                    return <div>
-                      {!loading && !error &&
-                        this.formatCollections(data.data.aggregations.collections)
+                <Tabs defaultActiveKey="1">
+                  <TabPane tab="Tab 1" key="1">
+                    {props.esFilter && <DataFetcher api={collectionSearch} query={props.esFilter} render={
+                      ({ data, loading, error }) => {
+                        return <div>
+                          {!loading && !error &&
+                            this.formatCollections(data.data.aggregations.collections)
+                          }
+                        </div>
                       }
-                    </div>
-                  }
-                } />}
+                    } />}
+                  </TabPane>
+                  <TabPane tab="Tab 2" key="2">
+                    <SpecimenCount query={props.esFilter} />
+
+                    <React.Fragment>
+                      <CountCard count={34563456} title="Collection descriptions" helpText="some explainer could go here" style={{ width: 400 }} />
+                      <CountProgress
+                        style={{ width: 400 }}
+                        items={[
+                          { title: '13.023 digitized', percent: 30 },
+                          { title: '982 with image', percent: 20 },
+                          { title: '1.202 with location', percent: 30 }
+                        ]}
+                        suffix="Specimens"
+                        title={Number(34563456).toLocaleString()}
+                      />
+                      <CountProgress
+                        style={{ width: 400 }}
+                        items={[
+                          { title: '13.023 digitized', percent: 30 },
+                          { title: '982 with image', percent: 20 },
+                          { title: '1.202 with location', percent: 1 }
+                        ]}
+                        title="Storage breakdown"
+                        strokeColor="pink"
+                      />
+                    </React.Fragment>
+                  </TabPane>
+                </Tabs>
               </React.Fragment>
             }} />
-
-            <React.Fragment>
-              <CountCard count={34563456} title="Collection descriptions" helpText="some explainer could go here" style={{ width: 400 }} />
-              <CountProgress
-                style={{ width: 400 }}
-                items={[
-                  { title: '13.023 digitized', percent: 30 },
-                  { title: '982 with image', percent: 20 },
-                  { title: '1.202 with location', percent: 30 }
-                ]}
-                suffix="Specimens"
-                title={Number(34563456).toLocaleString()}
-              />
-              <CountProgress
-                style={{ width: 400 }}
-                items={[
-                  { title: '13.023 digitized', percent: 30 },
-                  { title: '982 with image', percent: 20 },
-                  { title: '1.202 with location', percent: 1 }
-                ]}
-                title="Storage breakdown"
-                strokeColor="pink"
-              />
-            </React.Fragment>
-
           </Col>
         </Row>
       </React.Fragment>

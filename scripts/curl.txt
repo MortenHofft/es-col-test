@@ -25,7 +25,18 @@ curl -XPUT 'localhost:9200/collections/_mapping/collections?pretty&include_type_
     },
     "institution": {
       "type": "keyword"
-    }
+    },
+    "agents" : { 
+      "type" : "nested",
+      "properties" : {
+        "action" : { "type" : "keyword" },
+        "identifier" : { "type" : "keyword" },
+        "name" : { "type" : "text" }
+      }
+    },
+    "collectionLocation": {
+        "type": "geo_point"
+      }
   }
 }
 '

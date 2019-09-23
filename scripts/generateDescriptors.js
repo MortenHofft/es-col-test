@@ -2,12 +2,16 @@ const axios = require('axios');
 const apiUrl = 'http://api.gbif-uat.org/v1/';
 const helpers = require('./helpers');
 const _ = require('lodash');
+const Chance = require('chance');
+var chance = new Chance();
 
 // given a es index, a datasetKey, and a resolution, then generate a bunch of descriptors
 async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, countryFacetLimit) {
   facetSize = facetSize || 10;
   countryFacetLimit = countryFacetLimit || 1;
   resolution = resolution || 'orderKey';
+  let collectionLocation = helpers.getRandomCoordinates();
+
   //get dataset description
   let dataset = (await axios.get(apiUrl + 'dataset/' + datasetKey)).data;
   let descriptors = [];
@@ -38,7 +42,10 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
           collectionKey: datasetKey,
           collectionTitle: dataset.title,
           institution,
-          description: dataset.description
+          description: dataset.description,
+          agents: helpers.getRandomAgents(),
+          collectionLocation,
+          thematicFocus: helpers.getRandomDescription()
         });
       });
 
@@ -55,7 +62,10 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
           collectionKey: datasetKey,
           collectionTitle: dataset.title,
           institution: helpers.getRandomInstitution(),
-          description: dataset.description
+          description: dataset.description,
+          agents: helpers.getRandomAgents(),
+          collectionLocation,
+          thematicFocus: helpers.getRandomDescription()
         });
       }
     }
