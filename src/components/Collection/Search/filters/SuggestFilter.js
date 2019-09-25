@@ -71,33 +71,36 @@ class TaxonFilter extends React.Component {
     const { updateFilter, filter } = this.props;
 
     return (
-      <div
-        style={{
-          background: "white",
-          borderRadius: "3px",
-          padding: "10px",
-          boxShadow: "0 0 1000px 1000px rgba(0,0,0,.2)",
-          maxWidth: 400
-        }}
-      >
+      <React.Fragment>
         {this.state.taxonSearchVisible &&
-          <AutoComplete
-            dataSource={this.state.speciesSuggestions}
-            style={{ width: '100%' }}
-            autoFocus={true}
-            defaultValue=""
-            // allowClear={true}
-            onSearch={this.onSpeciesSearch}
-            onSelect={value => {
-              updateFilter({ ...filter, ...{ [this.props.name]: value } });
-              this.setState({ taxonSearchVisible: false });
+          <div
+            style={{
+              background: "white",
+              borderRadius: "3px",
+              padding: "10px",
+              boxShadow: "0 0 1000px 1000px rgba(0,0,0,.2)",
+              maxWidth: 400
             }}
-            placeholder={this.props.placeholder}
-          />}
-        <blockquote className={this.props.classes.blockquote}>
-          {this.props.helpText}
-        </blockquote>
-      </div>
+          >
+            <AutoComplete
+              dataSource={this.state.speciesSuggestions}
+              style={{ width: '100%' }}
+              autoFocus={true}
+              defaultValue=""
+              // allowClear={true}
+              onSearch={this.onSpeciesSearch}
+              onSelect={value => {
+                updateFilter({ ...filter, ...{ [this.props.name]: value } });
+                this.setState({ taxonSearchVisible: false });
+              }}
+              placeholder={this.props.placeholder}
+            />
+            <blockquote className={this.props.classes.blockquote}>
+              {this.props.helpText}
+            </blockquote>
+          </div>
+        }
+      </React.Fragment>
     );
   };
 

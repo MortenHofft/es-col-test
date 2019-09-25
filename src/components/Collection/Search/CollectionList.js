@@ -12,6 +12,7 @@ import CountCard from '../charts/generic/CountCard';
 import SpecimenCount from '../charts/SpecimenCount';
 import FilterManager from './filters/FilterManager';
 import DataFetcher from '../charts/DataFetcher';
+import CollectionResult from './CollectionResult/CollectionResult';
 
 const { TabPane } = Tabs;
 
@@ -72,22 +73,23 @@ class CollectionList extends React.Component {
   formatCollections = collections => {
     return collections.buckets.map(collection => {
       const firstHit = collection.descriptors.hits.hits[0]._source;
-      return <div key={firstHit.collectionKey} style={{ border: '1px solid tomato' }}>
-        <h3><a href={`https://gbif.org/dataset/${firstHit.collectionKey}`}>{firstHit.collectionTitle}</a></h3>
-        <ul>
-          {
-            collection.descriptors.hits.hits.map(doc => {
-              let e = doc._source;
-              return <li key={doc._id}>
-                <div>{e.location}</div>
-                <div>{e.scientificName} ({e.key})</div>
-                <div>{e.count} results</div>
-                <div>Year: {e.dateRange.gte} - {e.dateRange.lte}</div>
-              </li>
-            })
-          }
-        </ul>
-      </div>
+      return <CollectionResult collection={firstHit} descriptors={collection.descriptors.hits.hits}/>
+      // return <div key={firstHit.collectionKey} style={{ border: '1px solid tomato' }}>
+      //   <h3><a href={`https://gbif.org/dataset/${firstHit.collectionKey}`}>{firstHit.collectionTitle}</a></h3>
+      //   <ul>
+      //     {
+      //       collection.descriptors.hits.hits.map(doc => {
+      //         let e = doc._source;
+      //         return <li key={doc._id}>
+      //           <div>{e.location}</div>
+      //           <div>{e.scientificName} ({e.key})</div>
+      //           <div>{e.count} results</div>
+      //           <div>Year: {e.dateRange.gte} - {e.dateRange.lte}</div>
+      //         </li>
+      //       })
+      //     }
+      //   </ul>
+      // </div>
     });
   }
 
@@ -104,7 +106,7 @@ class CollectionList extends React.Component {
               return <React.Fragment>
                 <Filters {...props} />
                 <Tabs defaultActiveKey="1">
-                  <TabPane tab="Tab 1" key="1">
+                  <TabPane tab="Results" key="1">
                     {props.esFilter && <DataFetcher api={collectionSearch} query={props.esFilter} render={
                       ({ data, loading, error }) => {
                         return <div>
@@ -115,7 +117,7 @@ class CollectionList extends React.Component {
                       }
                     } />}
                   </TabPane>
-                  <TabPane tab="Tab 2" key="2">
+                  <TabPane tab="Metrics" key="2">
                     <SpecimenCount query={props.esFilter} />
 
                     <React.Fragment>
