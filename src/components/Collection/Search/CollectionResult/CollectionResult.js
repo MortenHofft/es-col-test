@@ -22,14 +22,23 @@ const styles = {
 };
 
 export const CollectionResult = props => {
-  const { collection, descriptors, classes, className, style } = props;
+  const { descriptors, classes, className, style } = props;
+  const collection = {
+    collectionTitle: 'CAS botanic collection',
+    institutionTitle: 'Chinese Academy of Science',
+    specimenCount: 71265,
+    digitisedCount: 42132,
+    description: 'Records from OEH’s Atlas of NSW Wildlife database of flora and fauna sightings. Includes records from other custodians such as the National Herbarium of NSW, Forests NSW, Australian Bird and Bat Banding Scheme and the Australian Museum.'
+  };
+
+  const percentDigitsed = Math.ceil(100*collection.specimenCount/collection.digitisedCount);
   return <article className={`${classes.card} ${className}`} style={style}>
     <div>
       <h1 className={classes.headline}>{collection.collectionTitle}</h1>
-      <div>From <a href="">Hacepette university</a></div>
-      <div>71.242 specimens (32% digitized)</div>
+      <div>From <a href="">{collection.institutionTitle}</a></div>
+      <div>{collection.specimenCount.toLocaleString()} specimens ({percentDigitsed.toLocaleString()}% digitized)</div>
       <p>
-        Records from OEH’s Atlas of NSW Wildlife database of flora and fauna sightings. Includes records from other custodians such as the National Herbarium of NSW, Forests NSW, Australian Bird and Bat Banding Scheme and the Australian Museum.
+        {collection.description}
       </p>
     </div>
     <div>
