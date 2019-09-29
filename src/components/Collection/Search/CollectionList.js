@@ -5,7 +5,7 @@ import injectSheet from "react-jss";
 import PropTypes from "prop-types";
 import _get from "lodash/get";
 import moment from 'moment';
-import { locations, speciesSuggest, getEsQuery, collectionSearch } from '../../../api/collection';
+import { locations, speciesSuggest, collectionSearch } from '../../../api/collection';
 import Filters from './Filters';
 import CountProgress from '../charts/generic/CountProgress';
 import CountCard from '../charts/generic/CountCard';
@@ -73,7 +73,16 @@ class CollectionList extends React.Component {
   formatCollections = collections => {
     return collections.buckets.map(collection => {
       const firstHit = collection.descriptors.hits.hits[0]._source;
-      return <CollectionResult collection={firstHit} descriptors={collection.descriptors.hits.hits}/>
+      const col = {
+        specimenCount: collection.specimenCount.value,
+        digitizedCount: collection.digitizedCount.value,
+        descriptorCount: collection.descriptors.doc_count,
+        title: firstHit.collectionTitle,
+        institutionKey: firstHit.institution,
+        institutionTitle: firstHit.institution,
+        description: firstHit.description
+      };
+      return <CollectionResult key={firstHit.collectionKey} collection={col} descriptors={collection.descriptors.hits.hits}/>
       // return <div key={firstHit.collectionKey} style={{ border: '1px solid tomato' }}>
       //   <h3><a href={`https://gbif.org/dataset/${firstHit.collectionKey}`}>{firstHit.collectionTitle}</a></h3>
       //   <ul>
@@ -107,7 +116,7 @@ class CollectionList extends React.Component {
                 <Filters {...props} />
                 <Tabs defaultActiveKey="1">
                   <TabPane tab="Results" key="1">
-                    {props.esFilter && <DataFetcher api={collectionSearch} query={props.esFilter} render={
+                    {props.esFilter && <DataFetcher api={collectionSearch} query={{body: props.esFilter}} render={
                       ({ data, loading, error }) => {
                         return <div>
                           {!loading && !error &&

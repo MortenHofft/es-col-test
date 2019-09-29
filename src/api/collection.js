@@ -3,6 +3,50 @@ import bodybuilder from 'bodybuilder';
 import axios_cancelable from './util/axiosCancel';
 import { getLocations } from './enumeration';
 
+/*
+Using ES
+graphql seems a fair candidate for our registry APIs and porbably also for our ES endpoints.
+Unclear how to secure ES while also making it flexible for us and the users. Enough to only allow
+selected indices and only _search and _count? 
+1.  We could set up a complete REST wrapper around ES that only allowed certain requests with a 
+    small set of predefined options.
+2.  We could allow all requests, but only to this index using _search or _count 
+    (is that sufficient ? are there hacks to misuse aside from doing very heavy queries?)
+3.  We could do 2, but build graphQl views on top of that to allow resolving a subset of fields.
+
+I like the 2/3 version. But the graphQl parts seems tricky. 
+Can the graphql schema but auto-generated from the ES mapping? https://github.com/graphql-compose/graphql-compose-elasticsearch
+doing it for hits alone would be simple, but then what when starting to work with aggregations. 
+E.g. unclear how to resolve aggregations of type userSelectedName: hits: [name, value]. 
+How to resolve the name requires you know what field was aggregated on. 
+
+Caching
+A data cache will still work with varnish. Apollo can do server cache with e.g. Dataloader. 
+There migth be varnish on top of that for requests coming in with GET (could be all requests smaller than x bytes) 
+and all persistent (https://blog.apollographql.com/persisted-graphql-queries-with-apollo-client-119fd7e6bba5).
+And then the client layer if using Apollo client. Then uniqu queries such as search often is, is probably only 
+cached in the data layer, and standard queries (like say a dataset page) is cached with a hashID GET.
+
+Errors
+Makes sense to send partial data even if a particular field cannot be resolved. 
+But that requires a strategy for telling the client that this operation failed, for some or all of x. 
+But other parts of the result might well be perfectly useful and enough to provide a sensible UI in 
+an environment with many unstable endpoints.
+Instead log on server and inform user of missing data.
+
+I like the idea of using remote schemas and stitching them together. 
+So that we can wrap external services in a grapql API and stitch them all together. Possibly aligning naming.
+APIs could be something along: 
+  registry, occurrences, species, treatments, literature, col+, BOLD, wikidata, orcid, collectionDescriptors, Bloodhound, BHL, fundref, dataCite, ...etc.
+
+Some of these, might be something we crawl and index if there is no API to use. 
+Other we translate existing external REST/other APIs
+Others have a GraphQL API already
+
+Given that we will start to use ES more, an easy way to compose ES queries would be useful. 
+Something akin to our v1 e.g.
+*/
+
 export const locations = getLocations();
 
 export const getEsQuery = async (query) => {
@@ -34,12 +78,12 @@ export const getEsQuery = async (query) => {
   return filters.length === 0 ? { "query_string": { "query": "*" } } : { "bool": { "must": filters } };
 };
 
-export const collectionSearch = async (bodyQuery) => {
+export const collectionSearch = async (query) => {
   const postTest = {
     "size": 0,
     "query": {
       "script_score": {
-        "query": bodyQuery,
+        "query": query.body,
         "script": {
           "source": "_score + doc['count'].value/10000"
         }
@@ -48,21 +92,26 @@ export const collectionSearch = async (bodyQuery) => {
     "aggs": {
       "collections": {
         "terms": {
-          "field": "collectionKey",
-          "size": 500,
+          "field": "collectionKey", // version specific
+          "size": query.limit || 500,
           "order": {
             "max_score": "desc"
           }
         },
         "aggs": {
-          "sum": {
+          "specimenCount": {
             "sum": {
               "field": "count"
             }
           },
+          "digitizedCount": {
+            "sum": {
+              "field": "digitizedCount"
+            }
+          },
           "descriptors": {
             "top_hits": {
-              "size": 5
+              "size": 3
             }
           },
           "max_score": {
