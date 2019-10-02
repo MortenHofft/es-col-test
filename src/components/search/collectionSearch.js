@@ -8,7 +8,6 @@ import CollectionList from '../Collection/Search/CollectionList';
 import DataQuery from '../DataQuery';
 import { standardColumns } from './columns';
 import { ItemHeader } from '../common';
-import Paper from './Paper';
 
 const columns = [
   {
@@ -48,7 +47,5 @@ const getTitle = type => {
 };
 
 export const CollectionSearch = ({ initQuery = { q: '', limit: 25, offset: 0 } }) => {
-  return <Paper padded>
-    <CollectionList />
-  </Paper>
+  return <CollectionList />
 };

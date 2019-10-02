@@ -13,6 +13,7 @@ import SpecimenCount from '../charts/SpecimenCount';
 import FilterManager from './filters/FilterManager';
 import DataFetcher from '../charts/DataFetcher';
 import CollectionResult from './CollectionResult/CollectionResult';
+import Paper from '../../search/Paper';
 
 const { TabPane } = Tabs;
 
@@ -70,7 +71,7 @@ class CollectionList extends React.Component {
       });
   };
 
-  formatCollections = collections => {
+  formatCollections = (collections, filter) => {
     return collections.buckets.map(collection => {
       const firstHit = collection.descriptors.hits.hits[0]._source;
       const col = {
@@ -80,9 +81,11 @@ class CollectionList extends React.Component {
         title: firstHit.collectionTitle,
         institutionKey: firstHit.institution,
         institutionTitle: firstHit.institution,
-        description: firstHit.description
+        doi: firstHit.doi,
+        elvisSupport: firstHit.elvisSupport,
+        description: firstHit.description,
       };
-      return <CollectionResult key={firstHit.collectionKey} collection={col} descriptors={collection.descriptors.hits.hits}/>
+      return <CollectionResult noFilter={!filter} key={firstHit.collectionKey} collection={col} descriptors={collection.descriptors.hits.hits} style={{marginBottom: 20}}/>
       // return <div key={firstHit.collectionKey} style={{ border: '1px solid tomato' }}>
       //   <h3><a href={`https://gbif.org/dataset/${firstHit.collectionKey}`}>{firstHit.collectionTitle}</a></h3>
       //   <ul>
@@ -113,14 +116,16 @@ class CollectionList extends React.Component {
           <Col span={24}>
             <FilterManager render={props => {
               return <React.Fragment>
-                <Filters {...props} />
+                <Paper padded>
+                  <Filters {...props} />
+                </Paper>
                 <Tabs defaultActiveKey="1">
                   <TabPane tab="Results" key="1">
                     {props.esFilter && <DataFetcher api={collectionSearch} query={{body: props.esFilter}} render={
                       ({ data, loading, error }) => {
                         return <div>
                           {!loading && !error &&
-                            this.formatCollections(data.data.aggregations.collections)
+                            this.formatCollections(data.data.aggregations.collections, props.filter)
                           }
                         </div>
                       }

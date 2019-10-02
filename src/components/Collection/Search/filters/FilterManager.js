@@ -14,9 +14,14 @@ class FilterManager extends React.Component {
   }
 
   setFilter = async filter => {
-    console.log(filter);
-    let esFilter = await getEsQuery(filter);
     if (!this._isMount) return;
+    if (typeof filter === 'object') {
+      Object.keys(filter).forEach(key => {
+        if (typeof filter[key] === 'undefined') delete filter[key];
+      })
+      if (Object.keys(filter).length === 0) filter = undefined;
+    }
+    let esFilter = await getEsQuery(filter);
     this.setState({ filter, esFilter });
   }
 

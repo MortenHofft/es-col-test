@@ -111,7 +111,7 @@ export const collectionSearch = async (query) => {
           },
           "descriptors": {
             "top_hits": {
-              "size": 3
+              "size": query.descriptorLimit || 2
             }
           },
           "max_score": {
@@ -136,6 +136,10 @@ export const speciesSuggest = str => {
 
 export const speciesFromKey = key => {
   return axios_cancelable.get(`http://api.gbif.org/v1/species/${key}`);
+};
+
+export const institutionFromKey = key => {
+  return axios_cancelable.get(`http://api.gbif.org/v1/grscicoll/institution/${key}`);
 };
 
 

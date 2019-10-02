@@ -35,7 +35,6 @@ export default getData =>
       if (this.dataResult && typeof this.dataResult.then === "function") {
         this.dataResult.then(
           result => {
-            console.log(5);
             if (this._mounted) {
               this.setState({ title: result.title });
             }
