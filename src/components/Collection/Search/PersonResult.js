@@ -5,6 +5,10 @@ import injectSheet from "react-jss";
 import PropTypes from "prop-types";
 import _startCase from 'lodash/startCase';
 import JazzIcon, { hash } from './JassIcon';
+import { speciesFromKey } from "../../../api/collection";
+import fieldFormater from "./FieldFormater";
+
+const ScientificName = fieldFormater(id => speciesFromKey(id).then(x => ({ title: x.data.scientificName })));
 
 const styles = {
   card: {
@@ -29,7 +33,7 @@ const styles = {
 };
 
 const PersonResult = props => {
-  const { classes, className, style, person } = props;
+  const { classes, className, style, person, topTaxa } = props;
   const agent = {
     name: person.name,
     orcId: 'https://orcid.org/0000-0002-8442-8025',
@@ -47,7 +51,7 @@ const PersonResult = props => {
         <div className={classes.content}>
           <h1 className={classes.headline}>{agent.name}</h1>
           <div>Curator</div>
-          <div>Research area: Magnolia and Tropical flowers</div>
+          <div>Top descriptors: {topTaxa.map(taxon => {return <span key={taxon.key}><ScientificName id={taxon.key} /></span>})}</div>
           <div>Contributes to 3 collections</div>
           <div>
             <span>iD</span>{agent.orcid}

@@ -120,7 +120,7 @@ class CollectionList extends React.Component {
       //   specimenCount: person.specimenCount.value,
       //   digitizedCount: person.digitizedCount.value,
       // };
-      return <PersonResult person={firstHit} descriptors={person.exampleAgents.hits.hits} style={{marginBottom: 20}}/>
+      return <PersonResult person={firstHit} topTaxa={person.agentToDescriptor.topTaxa.buckets} style={{marginBottom: 20}}/>
     });
   }
 
