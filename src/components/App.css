@@ -6,6 +6,7 @@ html {
 
 html, body, #root {
   min-height: 100%;
+  background: #f4f4f7;
 }
 
 .headerLogo {
@@ -51,6 +52,12 @@ html, body, #root {
 }
 
 /* TODO: Not ideal, but will have to do for now. A themed component would make better sense*/
+.ant-tabs-bar {
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+}
+
 .actionLink {
   background: none;
   border: none;

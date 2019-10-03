@@ -2,17 +2,17 @@ import React from "react";
 import { FormattedMessage, FormattedNumber, injectIntl } from "react-intl";
 import { Input, AutoComplete, Table, Spin, Alert, Row, Col, DatePicker, Tabs } from "antd";
 import injectSheet from "react-jss";
-import PropTypes from "prop-types";
 import _get from "lodash/get";
-import moment from 'moment';
-import { locations, speciesSuggest, collectionSearch } from '../../../api/collection';
+import { locations, speciesSuggest, collectionSearch, peopleSearch } from '../../../api/collection';
 import Filters from './Filters';
-import CountProgress from '../charts/generic/CountProgress';
-import CountCard from '../charts/generic/CountCard';
-import SpecimenCount from '../charts/SpecimenCount';
+import CollectionCount from '../charts/CollectionCount';
+import SpecimenCounts from '../charts/SpecimenCounts';
+import CollectionCare from '../charts/CollectionCare';
+import PreservationCounts from '../charts/PreservationCounts';
 import FilterManager from './filters/FilterManager';
 import DataFetcher from '../charts/DataFetcher';
 import CollectionResult from './CollectionResult/CollectionResult';
+import PersonResult from './PersonResult';
 import Paper from '../../search/Paper';
 
 const { TabPane } = Tabs;
@@ -26,6 +26,14 @@ const styles = {
     "& thead > tr > th": {
       wordBreak: "keep-all"
     }
+  },
+  cards: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    margin: -10
+  },
+  card: {
+    flex: '1 0 50%'
   }
 };
 
@@ -105,6 +113,17 @@ class CollectionList extends React.Component {
     });
   }
 
+  formatPeople = (people, filter) => {
+    return people.topAgents.buckets.map(person => {
+      const firstHit = person.exampleAgents.hits.hits[0]._source;
+      // const p = {
+      //   specimenCount: person.specimenCount.value,
+      //   digitizedCount: person.digitizedCount.value,
+      // };
+      return <PersonResult person={firstHit} descriptors={person.exampleAgents.hits.hits} style={{marginBottom: 20}}/>
+    });
+  }
+
   render = () => {
     const {
       classes,
@@ -119,8 +138,8 @@ class CollectionList extends React.Component {
                 <Paper padded>
                   <Filters {...props} />
                 </Paper>
-                <Tabs defaultActiveKey="1">
-                  <TabPane tab="Results" key="1">
+                <Tabs defaultActiveKey="2">
+                  <TabPane tab="Collections" key="1">
                     {props.esFilter && <DataFetcher api={collectionSearch} query={{body: props.esFilter}} render={
                       ({ data, loading, error }) => {
                         return <div>
@@ -131,32 +150,27 @@ class CollectionList extends React.Component {
                       }
                     } />}
                   </TabPane>
-                  <TabPane tab="Metrics" key="2">
-                    <SpecimenCount query={props.esFilter} />
-
-                    <React.Fragment>
-                      <CountCard count={34563456} title="Collection descriptions" helpText="some explainer could go here" style={{ width: 400 }} />
-                      <CountProgress
-                        style={{ width: 400 }}
-                        items={[
-                          { title: '13.023 digitized', percent: 30 },
-                          { title: '982 with image', percent: 20 },
-                          { title: '1.202 with location', percent: 30 }
-                        ]}
-                        suffix="Specimens"
-                        title={Number(34563456).toLocaleString()}
-                      />
-                      <CountProgress
-                        style={{ width: 400 }}
-                        items={[
-                          { title: '13.023 digitized', percent: 30 },
-                          { title: '982 with image', percent: 20 },
-                          { title: '1.202 with location', percent: 1 }
-                        ]}
-                        title="Storage breakdown"
-                        strokeColor="pink"
-                      />
-                    </React.Fragment>
+                  <TabPane tab="Staff" key="2">
+                    {props.esFilter && <DataFetcher api={peopleSearch} query={{body: props.esFilter}} render={
+                      ({ data, loading, error }) => {
+                        return <div>
+                          {!loading && !error &&
+                            <React.Fragment>
+                              {this.formatPeople(data.data.aggregations.agents, props.filter)}
+                              <pre>{JSON.stringify(data.data.aggregations, null, 2)}</pre>
+                            </React.Fragment>
+                          }
+                        </div>
+                      }
+                    } />}
+                  </TabPane>
+                  <TabPane tab="Metrics" key="3">
+                    <div className={classes.cards}>
+                      <div className={classes.card}><CollectionCount query={props.esFilter}/></div>
+                      <div className={classes.card}><SpecimenCounts query={props.esFilter}/></div>
+                      <div className={classes.card}><PreservationCounts query={props.esFilter}/></div>
+                      <div className={classes.card}><CollectionCare query={props.esFilter}/></div>
+                    </div>
                   </TabPane>
                 </Tabs>
               </React.Fragment>

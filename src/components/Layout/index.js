@@ -57,77 +57,11 @@ class SiteLayout extends Component {
       : width < EXTRA_LARGE;
     const isMobile = width < MEDIUM;
 
-    let contentMargin = collapsed ? menuCollapsedWidth : menuWidth;
-    if (isMobile) {
-      contentMargin = 0;
-    }
-
-    const sideMenu = <React.Fragment>
-      {!isMobile && <Sider
-        className={classes.sider}
-        style={{ left: isRTL ? 'auto' : 0, right: isRTL ? 0 : 'auto' }}
-        width={menuWidth}
-        trigger={null}
-        reverseArrow={true}
-        collapsible
-        collapsedWidth={menuCollapsedWidth}
-        breakpoint="lg"
-        collapsed={collapsed}
-      >
-        <BasicMenu collapsed={collapsed} />
-      </Sider>
-      }
-
-      {isMobile && <Drawer
-        placement={isRTL ? 'right' : 'left'}
-        closable={false}
-        onClose={() => {
-          this.setState({ collapsed: true });
-        }}
-        visible={!collapsed}
-        className="mainMenu__drawer"
-      >
-        <BasicMenu />
-      </Drawer>
-      }
-    </React.Fragment>;
-
     return (
 
-      <Layout style={{ minHeight: '100vh' }}>
-        {sideMenu}
-        <Layout style={{ marginLeft: `${isRTL ? 0 : contentMargin}px`, marginRight: `${isRTL ? contentMargin : 0}px` }}>
-
-          <Header style={{ background: '#fff', padding: 0, display: 'flex' }}>
-            {isMobile && <div className="headerLogo"><Logo style={{ height: '100px', flex: '0 0 auto' }} /></div>}
-            <Icon
-              style={{ flex: '0 0 auto' }}
-              className="menu-trigger"
-              type={collapsed ? 'menu-unfold' : 'menu-fold'}
-              onClick={this.toggle}
-            />
-            <div style={{ flex: '1 1 auto' }} />
-          </Header>
-          <Content style={{ overflow: 'initial', margin: '5px 16px 24px 16px', minHeight: 280 }}>
-            {this.props.children}
-          </Content>
-          <Footer className="text-center">
-            <FormattedMessage
-              id="copyrights"
-              defaultMessage="This site is affiliated to GBIF | Global Biodiversity Information Facility."
-            /> <a href="https://www.gbif.org/terms/privacy-policy" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id="cookieAndPolicy" defaultMessage="Cookie and privacy policy."/>
-            </a>
-            <div>
-              <a href="https://github.com/gbif/registry-console" target="_blank" rel="noopener noreferrer">
-                <FormattedMessage id="githubRepo" defaultMessage="GitHub Repository"/>
-              </a> | <a href="https://github.com/gbif/registry-console/issues" target="_blank" rel="noopener noreferrer">
-                <FormattedMessage id="issuesTracker" defaultMessage="Issues tracker"/>
-              </a>
-            </div>
-          </Footer>
-        </Layout>
-      </Layout>
+      <Content style={{ overflow: 'initial', margin: '16px auto', minHeight: 280, maxWidth: 1000 }}>
+        {this.props.children}
+      </Content>
     );
   }
 }

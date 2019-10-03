@@ -12,7 +12,7 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
   resolution = resolution || 'orderKey';
   let collectionLocation = helpers.getRandomCoordinates();
   let elvisSupport = Math.random() > 0.66;
-  
+
   //get dataset description
   let dataset = (await axios.get(apiUrl + 'dataset/' + datasetKey)).data;
   let descriptors = [];
@@ -25,19 +25,27 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
     let taxon = await helpers.getHigherTaxa(taxa[i].name);
     //for each key, breakdown per top 1 country vs world
     let countriesResult = (await axios.get(apiUrl + `occurrence/search?facet=country&limit=0&facetLimit=${countryFacetLimit}&${resolution}=${taxa[i].name}&datasetKey=${datasetKey}`)).data;
-    
-    let preservation = helpers.getRandomPreservation();
+
+    let preservation = Math.random() > 0.2 ? helpers.getRandomPreservation() : undefined;
     let dateRange = helpers.getRandomDateRange();
 
+    let hasCareStats = Math.random() > 0.5;
+    let careMean = Math.floor(50 + 25 * Math.random());
+    let careStd = Math.floor(1 + 2 * Math.random());
     let countries = countriesResult.facets[0].counts
     if (countries.length > 0) {
       countries.forEach(countryFacet => {
         let location = helpers.getLocationFromCountryCode(countryFacet.name);
         let counts = helpers.getCounts(countryFacet.count);
+
+        let careStats = {};
+        if (hasCareStats) careStats = helpers.getCareCounts(careMean, careStd);
+
         descriptors.push({
           ...taxon,
           ...location,
           ...counts,
+          ...careStats,
           preservation,
           dateRange,
           collectionKey: datasetKey,
@@ -52,14 +60,18 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
         });
       });
 
-      let diffCount = _.sumBy(countries, 'count')
+      let diffCount = countriesResult.count - _.sumBy(countries, 'count')
       if (diffCount > 10) {
         let location2 = helpers.getLocationFromCountryCode();//world
         let counts2 = helpers.getCounts(diffCount);
+        let careStats2 = {};
+        if (hasCareStats) careStats2 = helpers.getCareCounts(careMean, careStd);
+
         descriptors.push({
           ...taxon,
           ...location2,
           ...counts2,
+          ...careStats2,
           preservation,
           dateRange,
           collectionKey: datasetKey,
@@ -98,7 +110,7 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
 
   //add descriptors
   for (var i = 0; i < descriptors.length; i++) {
-    axios.post(esUrl, descriptors[i]).catch(function (err) {
+    await axios.post(esUrl, descriptors[i]).catch(function (err) {
       console.log(err);
     });
   }
@@ -212,7 +224,7 @@ let datasets = [
 
 let esUrl = 'http://localhost:9200/collections/_doc/';
 
-createDescriptors().catch(function(err){
+createDescriptors().catch(function (err) {
   console.log(err)
 });
 

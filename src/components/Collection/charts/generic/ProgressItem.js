@@ -16,14 +16,18 @@ const styles = {
   }
 };
 
+const formatAsPercentage = (nr, digits) => {
+  return (100*nr).toFixed(digits || 0);
+}
+
 export const ProgressItem = props => {
   const { classes, title, percent, strokeColor } = props;
   return <React.Fragment>
     <div className={classes.small}>
       <span>{title}</span>
-      <span className={classes.right}>{percent}%</span>
+      <span className={classes.right}>{formatAsPercentage(percent)}%</span>
     </div>
-    <Progress percent={percent} size="small" showInfo={false} strokeColor={strokeColor}/>
+    <Progress percent={100*percent} size="small" showInfo={false} strokeColor={strokeColor}/>
   </React.Fragment>
 }
 

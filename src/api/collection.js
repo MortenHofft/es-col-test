@@ -52,7 +52,7 @@ export const locations = getLocations();
 export const getEsQuery = async (query) => {
   let filters = [];
   if (typeof query !== 'object') return { "query_string": { "query": "*" } };
-  
+
   if (query.q) {
     filters.push({
       "query_string": {
@@ -200,36 +200,51 @@ async function getTaxonQuery(taxonKey) {
   };
 }
 
-const aggs = {
-  "group_by_collection": {
-    "terms": {
-      "field": "collectionKey",
-      "size": 500,
-      "order": {
-        "max_score": "desc"
+
+export const peopleSearch = async (query) => {
+  const postTest = {
+    "size": 0,
+    "query": {
+      "script_score": {
+        "query": query.body,
+        "script": {
+          "source": "_score + doc['count'].value/10000"
+        }
       }
     },
     "aggs": {
-      "sum": {
-        "sum": {
-          "field": "count"
-        }
-      },
-      "by_top_hit": {
-        "top_hits": {
-          "size": 1
-        }
-      },
-      "max_score": {
-        "max": {
-          "script": "_score"
-        }
+      "agents": {
+          "nested": {
+              "path": "agents"
+          },
+          "aggs": {
+              "topAgents": {
+                  "terms": {
+                      "field": "agents.identifier",
+                      size: query.limit || 500
+                  },
+                  "aggs": {
+                      "agentToDescriptor": {
+                          "reverse_nested": {},
+                          "aggs": {
+                              "topTaxa": {
+                                  "terms": {
+                                      "field": "key",
+                                      "size": 5
+                                  }
+                              }
+                          }
+                      },
+                      "exampleAgents": {
+                          "top_hits": {
+                              "size": 2
+                          }
+                      }
+                  }
+              }
+          }
       }
-    }
-  },
-  "sum": {
-    "sum": {
-      "field": "count"
-    }
   }
+  };
+  return axios_cancelable.post('http://localhost:9200/collections/_search', postTest);
 };

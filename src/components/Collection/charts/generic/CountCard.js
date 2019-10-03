@@ -12,7 +12,7 @@ const styles = {
     color: '#7f82a2',
     border: '1px solid #ddd',
     overflow: 'hidden',
-    display: 'inline-block',
+    display: 'block',
     margin: 10
   },
   count: {
@@ -48,7 +48,7 @@ const styles = {
 
 export const CountCard = props => {
   const { classes, className, style, count, title, helpText, loading, error } = props;
-  console.log({loading, error, count});
+  // console.log({loading, error, count});
   return <div className={`${classes.card} ${className}`} style={style}>
     <div>
       <div className={classes.help}>

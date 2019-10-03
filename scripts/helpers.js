@@ -19,6 +19,16 @@ function getPrettyNumber(nr) {
   let size = Math.pow(10, Math.floor(nr).toString().length - 1);
   return Math.min(Math.max(0, Math.ceil(nr / size) * size), 1000000);
 }
+
+function random(m, s, max, min) {
+  m = m || 50;
+  s = s || m/5;
+  let r = m + 2.0 * s * (Math.random() + Math.random() + Math.random() - 1.5);
+  if (max) r = Math.min(max, r);
+  if (min) r = Math.max(min, r);
+  return r;
+}
+
 function getCounts(count) {
   return {
     count: getPrettyNumber(count),
@@ -27,6 +37,15 @@ function getCounts(count) {
     uncertainty: 5 * _.random(1, 5) / 100,
     numberCatalogued: getPrettyNumber(count * _.random(0, 0.25)),
     StorageVolume: _.random(2, 100)
+  }
+}
+
+function getCareCounts(m, s) {
+  return {
+    physicalAccessibility: random(m, s, 98, 5),
+    physicalCondition: random(m, s, 98, 5),
+    housingMaterials: random(m, s, 98, 5),
+    storageEquipment: random(m, s, 98, 5)
   }
 }
 
@@ -156,5 +175,6 @@ module.exports = {
   getRandomAgents,
   getRandomDescription,
   getCounts,
-  getLocationFromCountryCode
+  getLocationFromCountryCode,
+  getCareCounts
 }

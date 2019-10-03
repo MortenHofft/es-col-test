@@ -12,7 +12,7 @@ const styles = {
     padding: '15px 20px',
     color: '#7f82a2',
     border: '1px solid #ddd',
-    display: 'inline-block',
+    display: 'block',
     margin: 10
   },
   count: {
