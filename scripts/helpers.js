@@ -2,7 +2,7 @@ const axios = require('axios');
 const _ = require('lodash');
 const countryMap = require('./countries');
 const Chance = require('chance');
-var chance = new Chance();
+var chance = new Chance(1234);
 
 async function getHigherTaxa(key, actualCount) {
   var response = await axios.get(`https://api.gbif.org/v1/species/${key}`);
@@ -91,35 +91,32 @@ function getRandomInstitution() {
   return ['8dcaa17b-eaf0-4017-a064-90587700aa4e', '07558d80-dea0-41f8-a1b7-b147e9515605', '1d808a7c-1f9e-4379-9616-edb749ecf10e'][_.random(0, 2)];
 }
 
-let agents = [
-  {
-    action: 'CURATED',
-    identifier: '123',
-    name: 'Benny'
-  },
-  {
-    action: 'COLLECTED',
-    identifier: '123',
-    name: 'Benny'
-  },
-  {
-    action: 'CURATED',
-    identifier: '456',
-    name: 'Beate'
-  },
-  {
-    action: 'COLLECTED',
-    identifier: '789',
-    name: 'Carola'
-  },
-  {
-    action: 'IDENTIFIED',
-    identifier: '011',
-    name: 'Jasper'
+let hash = function (str) {
+  var hash = 0, i, chr;
+  if (str.length === 0) return hash;
+  for (i = 0; i < str.length; i++) {
+    chr = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
   }
-];
-function getRandomAgent() {
-  return agents[_.random(0, agents.length - 1)];
+  return hash;
+};
+
+let agents = [];
+let actions = ['CURATED', 'CURATED', 'CURATED', 'CURATED', 'COLLECTED', 'IDENTIFIED'];
+
+//create agents
+for (var i = 0; i < 200; i++ ) {
+  agents.push({
+    name: chance.name({ middle: true }),
+    identifier: chance.integer()
+  });
+}
+
+function getRandomAgent(localChance) {
+  let a = agents[_.random(0, agents.length - 1)];
+  a.action = localChance.weighted(['CURATED', 'COLLECTED', 'IDENTIFIED'], [4, 2, 1])
+  return a;
 }
 
 function getRandomDescription() {
@@ -130,10 +127,11 @@ function getRandomCoordinates() {
   return chance.coordinates();
 }
 
-function getRandomAgents() {
-  let a = [getRandomAgent()];
-  if (Math.random() > 0.5) {
-    a.push(getRandomAgent());
+function getRandomAgents(seed) {
+  var localChance = new Chance(hash(seed));
+  let a = [getRandomAgent(localChance)];
+  if (localChance.bool({ likelihood: 50 })) {
+    a.push(getRandomAgent(localChance));
   }
   return a;
 }

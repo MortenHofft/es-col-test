@@ -14,6 +14,7 @@ import DataFetcher from '../charts/DataFetcher';
 import CollectionResult from './CollectionResult/CollectionResult';
 import PersonResult from './PersonResult';
 import Paper from '../../search/Paper';
+import Map from '../charts/Map';
 
 const { TabPane } = Tabs;
 
@@ -120,7 +121,7 @@ class CollectionList extends React.Component {
       //   specimenCount: person.specimenCount.value,
       //   digitizedCount: person.digitizedCount.value,
       // };
-      return <PersonResult person={firstHit} topTaxa={person.agentToDescriptor.topTaxa.buckets} style={{marginBottom: 20}}/>
+      return <PersonResult key={firstHit.identifier} person={firstHit} topTaxa={person.agentToDescriptor.topTaxa.buckets} style={{marginBottom: 20}}/>
     });
   }
 
@@ -138,7 +139,7 @@ class CollectionList extends React.Component {
                 <Paper padded>
                   <Filters {...props} />
                 </Paper>
-                <Tabs defaultActiveKey="2">
+                <Tabs defaultActiveKey="3">
                   <TabPane tab="Collections" key="1">
                     {props.esFilter && <DataFetcher api={collectionSearch} query={{body: props.esFilter}} render={
                       ({ data, loading, error }) => {
@@ -157,7 +158,7 @@ class CollectionList extends React.Component {
                           {!loading && !error &&
                             <React.Fragment>
                               {this.formatPeople(data.data.aggregations.agents, props.filter)}
-                              <pre>{JSON.stringify(data.data.aggregations, null, 2)}</pre>
+                              {/* <pre>{JSON.stringify(data.data.aggregations, null, 2)}</pre> */}
                             </React.Fragment>
                           }
                         </div>
@@ -166,6 +167,7 @@ class CollectionList extends React.Component {
                   </TabPane>
                   <TabPane tab="Metrics" key="3">
                     <div className={classes.cards}>
+                      {/* <Map /> */}
                       <div className={classes.card}><CollectionCount query={props.esFilter}/></div>
                       <div className={classes.card}><SpecimenCounts query={props.esFilter}/></div>
                       <div className={classes.card}><PreservationCounts query={props.esFilter}/></div>

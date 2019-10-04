@@ -81,11 +81,22 @@ export const getEsQuery = async (query) => {
 export const collectionSearch = async (query) => {
   const postTest = {
     "size": 0,
-    "query": {
-      "script_score": {
+    // "query": {
+    //   "script_score": {
+    //     "query": query.body,
+    //     "script": {
+    //       "source": "_score + doc['count'].value/10000"
+    //     }
+    //   }
+    // },
+    // query: query.body,
+    query: {
+      "function_score": {
         "query": query.body,
-        "script": {
-          "source": "_score + doc['count'].value/10000"
+        "script_score": {
+          "script": {
+            "source": "_score + doc['count'].value/10000"
+          }
         }
       }
     },
@@ -204,47 +215,48 @@ async function getTaxonQuery(taxonKey) {
 export const peopleSearch = async (query) => {
   const postTest = {
     "size": 0,
-    "query": {
-      "script_score": {
-        "query": query.body,
-        "script": {
-          "source": "_score + doc['count'].value/10000"
-        }
-      }
-    },
+    // "query": {
+    //   "script_score": {
+    //     "query": query.body,
+    //     "script": {
+    //       "source": "_score + doc['count'].value/10000"
+    //     }
+    //   }
+    // },
+    query: query.body,
     "aggs": {
       "agents": {
-          "nested": {
-              "path": "agents"
-          },
-          "aggs": {
-              "topAgents": {
-                  "terms": {
-                      "field": "agents.identifier",
-                      size: query.limit || 500
-                  },
-                  "aggs": {
-                      "agentToDescriptor": {
-                          "reverse_nested": {},
-                          "aggs": {
-                              "topTaxa": {
-                                  "terms": {
-                                      "field": "key",
-                                      "size": 5
-                                  }
-                              }
-                          }
-                      },
-                      "exampleAgents": {
-                          "top_hits": {
-                              "size": 2
-                          }
-                      }
+        "nested": {
+          "path": "agents"
+        },
+        "aggs": {
+          "topAgents": {
+            "terms": {
+              "field": "agents.identifier",
+              size: query.limit || 20
+            },
+            "aggs": {
+              "agentToDescriptor": {
+                "reverse_nested": {},
+                "aggs": {
+                  "topTaxa": {
+                    "terms": {
+                      "field": "key",
+                      "size": 5
+                    }
                   }
+                }
+              },
+              "exampleAgents": {
+                "top_hits": {
+                  "size": 2
+                }
               }
+            }
           }
+        }
       }
-  }
+    }
   };
   return axios_cancelable.post('http://localhost:9200/collections/_search', postTest);
 };

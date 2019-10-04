@@ -52,7 +52,7 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
           collectionTitle: dataset.title,
           institution,
           description: dataset.description,
-          agents: helpers.getRandomAgents(),
+          agents: helpers.getRandomAgents(dataset.key),
           collectionLocation,
           thematicFocus: helpers.getRandomDescription(),
           doi: dataset.doi,
@@ -78,7 +78,7 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
           collectionTitle: dataset.title,
           institution: helpers.getRandomInstitution(),
           description: dataset.description,
-          agents: helpers.getRandomAgents(),
+          agents: helpers.getRandomAgents(dataset.key),
           collectionLocation,
           thematicFocus: helpers.getRandomDescription(),
           doi: dataset.doi,
@@ -111,7 +111,8 @@ async function generateDescriptors(esUrl, datasetKey, resolution, facetSize, cou
   //add descriptors
   for (var i = 0; i < descriptors.length; i++) {
     await axios.post(esUrl, descriptors[i]).catch(function (err) {
-      console.log(err);
+      console.log(Object.keys(err));
+      console.log(err.response);
     });
   }
 }
@@ -222,7 +223,7 @@ let datasets = [
   }
 ];
 
-let esUrl = 'http://localhost:9200/collections/_doc/';
+let esUrl = 'http://localhost:9200/collections/col/';
 
 createDescriptors().catch(function (err) {
   console.log(err)
