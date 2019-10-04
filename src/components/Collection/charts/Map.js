@@ -6,14 +6,18 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoiaG9mZnQiLCJhIjoiY2llaGNtaGRiMDAxeHNxbThnNDV6MG95OSJ9.p6Dj5S7iN-Mmxic6Z03BEA";
 
 const styles = {
-  mapArea: {
-    //height: "400px"
+  card: {
+    background: 'white',
+    borderRadius: '3px',
+    color: '#7f82a2',
+    border: '1px solid #ddd',
+    overflow: 'hidden',
+    display: 'block'
   },
   map: {
     height: "400px",
     width: '100%',
-    border: "1px solid #ddd",
-    borderRadius: "3px",
+    overflow: 'hidden',
     "& canvas:focus": {
       outline: "none"
     }
@@ -45,7 +49,7 @@ class Map extends Component {
   render() {
     const { classes } = this.props;
     return (
-      <div className={classes.mapArea}>
+      <div className={classes.card}>
         <div ref={this.myRef} className={classes.map} />
       </div>
     );

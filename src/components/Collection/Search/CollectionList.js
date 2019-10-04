@@ -35,6 +35,9 @@ const styles = {
   },
   card: {
     flex: '1 0 50%'
+  },
+  cardWide: {
+    flex: '1 0 100%'
   }
 };
 
@@ -167,11 +170,11 @@ class CollectionList extends React.Component {
                   </TabPane>
                   <TabPane tab="Metrics" key="3">
                     <div className={classes.cards}>
-                      {/* <Map /> */}
                       <div className={classes.card}><CollectionCount query={props.esFilter}/></div>
                       <div className={classes.card}><SpecimenCounts query={props.esFilter}/></div>
                       <div className={classes.card}><PreservationCounts query={props.esFilter}/></div>
                       <div className={classes.card}><CollectionCare query={props.esFilter}/></div>
+                      <div className={classes.cardWide}><Map /></div>
                     </div>
                   </TabPane>
                 </Tabs>
