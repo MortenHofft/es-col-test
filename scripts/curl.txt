@@ -5,6 +5,9 @@ curl -XPUT 'localhost:9200/collections?pretty&pretty'
 curl -XPUT 'localhost:9200/collections/_mapping/collections?pretty&include_type_name=true' -H 'Content-Type: application/json' -d'
 {
   "properties": {
+    "coordinate_point": {
+      "type": "geo_point"
+    },
     "dateRange": {
       "type": "integer_range"
     },

@@ -1,10 +1,13 @@
-curl -XDELETE 'localhost:9200/collections?pretty&pretty'
-curl -XPUT 'localhost:9200/collections?pretty&pretty'
+curl -XDELETE 'https://es1.gbif-dev.org/collections?pretty&pretty'
+curl -XPUT 'https://es1.gbif-dev.org/collections?pretty&pretty'
 
 
-curl -XPUT 'localhost:9200/collections/_mapping/col?pretty' -H 'Content-Type: application/json' -d'
+curl -XPUT 'https://es1.gbif-dev.org/collections/_mapping/col?pretty' -H 'Content-Type: application/json' -d'
 {
   "properties": {
+    "coordinate_point": {
+      "type": "geo_point"
+    },
     "dateRange": {
       "type": "integer_range"
     },
@@ -35,8 +38,8 @@ curl -XPUT 'localhost:9200/collections/_mapping/col?pretty' -H 'Content-Type: ap
       }
     },
     "collectionLocation": {
-        "type": "geo_point"
-      }
+      "type": "geo_point"
+    }
   }
 }
 '

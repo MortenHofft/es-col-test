@@ -3,6 +3,10 @@ import bodybuilder from 'bodybuilder';
 import axios_cancelable from './util/axiosCancel';
 import { getLocations } from './enumeration';
 
+import config from './util/config';
+
+export const apiUrl = config.esUrl + '/collections';
+
 /*
 Using ES
 graphql seems a fair candidate for our registry APIs and porbably also for our ES endpoints.
@@ -134,7 +138,7 @@ export const collectionSearch = async (query) => {
       }
     }
   };
-  return axios_cancelable.post('http://localhost:9200/collections/_search', postTest);
+  return axios_cancelable.post(apiUrl + '/_search', postTest, {headers: {'Content-Type': 'application/json'}});
 };
 
 export const getCollection = key => {
@@ -142,7 +146,7 @@ export const getCollection = key => {
 };
 
 export const speciesSuggest = str => {
-  return axios_cancelable.get(`http://api.gbif.org/v1/species/suggest?q=${str}`);
+  return axios_cancelable.get(`http://api.gbif.org/v1/species/suggest?datasetKey=d7dddbf4-2cf0-4f39-9b2a-bb099caae36c&q=${str}`);
 };
 
 export const speciesFromKey = key => {
@@ -258,5 +262,5 @@ export const peopleSearch = async (query) => {
       }
     }
   };
-  return axios_cancelable.post('http://localhost:9200/collections/_search', postTest);
+  return axios_cancelable.post(apiUrl + '/_search', postTest, {headers: {'Content-Type': 'application/json'}});
 };

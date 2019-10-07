@@ -1,8 +1,7 @@
 import React from "react";
-import { FormattedMessage, FormattedNumber, injectIntl } from "react-intl";
-import { Input, AutoComplete, Table, Spin, Alert, Row, Col, DatePicker, Tabs } from "antd";
+import { injectIntl } from "react-intl";
+import { Spin, Row, Col, Tabs } from "antd";
 import injectSheet from "react-jss";
-import _get from "lodash/get";
 import { locations, speciesSuggest, collectionSearch, peopleSearch } from '../../../api/collection';
 import Filters from './Filters';
 import CollectionCount from '../charts/CollectionCount';
@@ -14,7 +13,7 @@ import DataFetcher from '../charts/DataFetcher';
 import CollectionResult from './CollectionResult/CollectionResult';
 import PersonResult from './PersonResult';
 import Paper from '../../search/Paper';
-import Map from '../charts/Map';
+// import Map from '../charts/Map';
 
 const { TabPane } = Tabs;
 
@@ -84,6 +83,9 @@ class CollectionList extends React.Component {
   };
 
   formatCollections = (collections, filter) => {
+    if (!collections || collections.buckets.length === 0) {
+      return <h2>No results - try broadening your search</h2>
+    }
     return collections.buckets.map(collection => {
       const firstHit = collection.descriptors.hits.hits[0]._source;
       const col = {
@@ -118,6 +120,9 @@ class CollectionList extends React.Component {
   }
 
   formatPeople = (people, filter) => {
+    if (!people || people.topAgents.buckets.length === 0) {
+      return <h2>No results - try broadening your search</h2>
+    }
     return people.topAgents.buckets.map(person => {
       const firstHit = person.exampleAgents.hits.hits[0]._source;
       // const p = {
@@ -142,7 +147,7 @@ class CollectionList extends React.Component {
                 <Paper padded>
                   <Filters {...props} />
                 </Paper>
-                <Tabs defaultActiveKey="3">
+                <Tabs defaultActiveKey="1">
                   <TabPane tab="Collections" key="1">
                     {props.esFilter && <DataFetcher api={collectionSearch} query={{body: props.esFilter}} render={
                       ({ data, loading, error }) => {
@@ -150,6 +155,7 @@ class CollectionList extends React.Component {
                           {!loading && !error &&
                             this.formatCollections(data.data.aggregations.collections, props.filter)
                           }
+                          {loading && <Spin />}
                         </div>
                       }
                     } />}
@@ -164,6 +170,7 @@ class CollectionList extends React.Component {
                               {/* <pre>{JSON.stringify(data.data.aggregations, null, 2)}</pre> */}
                             </React.Fragment>
                           }
+                          {loading && <Spin />}
                         </div>
                       }
                     } />}
@@ -174,7 +181,7 @@ class CollectionList extends React.Component {
                       <div className={classes.card}><SpecimenCounts query={props.esFilter}/></div>
                       <div className={classes.card}><PreservationCounts query={props.esFilter}/></div>
                       <div className={classes.card}><CollectionCare query={props.esFilter}/></div>
-                      <div className={classes.cardWide}><Map /></div>
+                      {/* <div className={classes.cardWide}><Map query={props.esFilter}/></div> */}
                     </div>
                   </TabPane>
                 </Tabs>

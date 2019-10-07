@@ -68,8 +68,8 @@ class App extends Component {
               <Layout>
                 <DocumentTitle title={'GBIF Registry'}>
                   <Switch>
-                    <Route exact path="/" component={Home}/>
-                    <Route exact path="/collection/search" component={CollectionSearch}/>
+                    {/* <Route exact path="/" component={Home}/> */}
+                    <Route exact path="/" component={CollectionSearch}/>
                     <AuthRoute
                       exact
                       path="/collection/create"

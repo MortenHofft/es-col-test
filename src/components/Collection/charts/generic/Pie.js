@@ -1,8 +1,9 @@
 import React from "react";
-import Plotly from "plotly.js";
+import Plotly from "../Plotly";
+// import Plotly from "plotly.js";
 import PropTypes from "prop-types";
-
 import createPlotlyComponent from "react-plotly.js/factory";
+
 const Plot = createPlotlyComponent(Plotly);
 
 const Pie = props => {

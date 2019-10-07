@@ -1,8 +1,7 @@
-import qs from 'qs';
-import bodybuilder from 'bodybuilder';
 import axios_cancelable from '../../../api/util/axiosCancel';
+import config from '../../../api/util/config';
 
-export const apiUrl = '//localhost:9200/collections/';
+export const apiUrl = config.esUrl + '/collections';
 
 export const getCollectionCount = query => {
   let body = {
@@ -16,7 +15,7 @@ export const getCollectionCount = query => {
       }
     }
   };
-  return axios_cancelable.post(`${apiUrl}_search`, body).then(response => response.data.aggregations.count.value);
+  return axios_cancelable.post(`${apiUrl}/_search`, body, {headers: {'Content-Type': 'application/json'}}).then(response => response.data.aggregations.count.value);
 }
 
 export const getSpecimenCounts = query => {
@@ -41,7 +40,7 @@ export const getSpecimenCounts = query => {
       },
     }
   };
-  return axios_cancelable.post(`${apiUrl}_search`, body).then(response => {
+  return axios_cancelable.post(`${apiUrl}/_search`, body, {headers: {'Content-Type': 'application/json'}}).then(response => {
     return {
       specimenCount: response.data.aggregations.specimenCount.value,
       digitizedCount: response.data.aggregations.digitizedCount.value,
@@ -84,7 +83,7 @@ export const getCollectionCare = query => {
   //     }
   //   }
   // };
-  return axios_cancelable.post(`${apiUrl}_search`, body).then(response => {
+  return axios_cancelable.post(`${apiUrl}/_search`, body).then(response => {
     const result = {
       physicalAccessibility: response.data.aggregations.physicalAccessibility,
       physicalCondition: response.data.aggregations.physicalCondition,
@@ -128,7 +127,7 @@ export const getPresevationCounts = query => {
       }
     }
   };
-  return axios_cancelable.post(`${apiUrl}_search`, body).then(response => {
+  return axios_cancelable.post(`${apiUrl}/_search`, body, {headers: {'Content-Type': 'application/json'}}).then(response => {
     const aggs = response.data.aggregations;
     const results = aggs.preservationTypes.buckets.map(b => {
       return {label: b.key, value: b.specimens.value}
