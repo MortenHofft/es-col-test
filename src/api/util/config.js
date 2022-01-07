@@ -5,8 +5,8 @@ const environments = {
     dataApi_v1: 'https://api.gbif-uat.org/v1',
     secretariatNode: '02c40d2a-1cba-4633-90b7-e36e5e97aba8',
     languages: [{ key: 'en', code: '🇬🇧', name: 'English' }],
-    // esUrl: '//localhost:7011'
-    esUrl: '//labs.gbif.org:7011'
+    esUrl: '//localhost:9200'
+    // esUrl: '//labs.gbif.org:7011'
   }
 };
 
